@@ -30,17 +30,16 @@ function drawVector(v, color){
 function handleDrawEvent(){
   const x1 = parseFloat(document.getElementById('x1Coord').value);
   const y1 = parseFloat(document.getElementById('y1Coord').value);
-  if (isNaN(x1) || isNaN(y1)) return;
-  if(!isNaN(document.getElementById('x2Coord').value) && !isNaN(document.getElementById('x2Coord').value)){
-    const x2 = parseFloat(document.getElementById('x2Coord').value);
-    const y2 = parseFloat(document.getElementById('y2Coord').value);
-    const v2 = new Vector3([x2, y2, 0]);
-  }
+  const x2 = parseFloat(document.getElementById('x2Coord').value);
+  const y2 = parseFloat(document.getElementById('y2Coord').value);
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  const v1 = new Vector3([x1, y1, 0]);
-  drawVector(v1, "red");
-  if(v2 != null){
-    drawVector(v2, "red");
+  if (!isNaN(x1) && !isNaN(y1)){
+    const v1 = new Vector3([x1, y1, 0]);
+    drawVector(v1, "red");
+  }
+  if(!isNaN(x2) && !isNaN(y2)){
+    const v2 = new Vector3([x2, y2, 0]);
+    drawVector(v2, "blue");
   }
 }
