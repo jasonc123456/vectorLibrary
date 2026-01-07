@@ -35,10 +35,12 @@ function handleDrawEvent(){
     const x2 = parseFloat(document.getElementById('x2Coord').value);
     const y2 = parseFloat(document.getElementById('y2Coord').value);
     const v2 = new Vector3([x2, y2, 0]);
-    drawVector(v2, "red");
   }
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   const v1 = new Vector3([x1, y1, 0]);
   drawVector(v1, "red");
+  if(v2 != null){
+    drawVector(v2, "red");
+  }
 }
