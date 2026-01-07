@@ -10,10 +10,25 @@
     </canvas>
     <script src="../lib/cuon-matrix-cse160.js"></script>
     <script src="asg0.js"></script>
-    <input id="x1Coord" type="text" placeholder="X1" />
-    <input id="y1Coord" type="text" placeholder="Y1" />
-    <input id="x2Coord" type="text" placeholder="X2" />
-    <input id="y2Coord" type="text" placeholder="Y2" />
+    <table>
+      <tr>
+        <td>v1:</td>
+        <td>x</td>
+        <td><input id="x1Coord" type="text" placeholder="0" size="6" /></td>
+        <td>y</td>
+        <td><input id="y1Coord" type="text" placeholder="0" size="6" /></td>
+      </tr>
+      <tr>
+        <td>v2:</td>
+        <td>x</td>
+        <td><input id="x2Coord" type="text" placeholder="0" size="6" /></td>
+        <td>y</td>
+        <td><input id="y2Coord" type="text" placeholder="0" size="6" /></td>
+      </tr>
+    </table>
+
+<input type="button" value="Draw" onclick="handleDrawEvent()" />
+
     <input type="button" value="Draw" onclick="handleDrawEvent()" />
   </body>
 </html>
