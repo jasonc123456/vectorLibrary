@@ -27,5 +27,17 @@
       </tr>
     </table>
     <input type="button" value="Draw" onclick="handleDrawEvent()" />
+    <br><br>
+    <span>Operation:</span>
+    <select id="opSelect">
+      <option value="add">Add</option>
+      <option value="sub">Subtract</option>
+      <option value="mul">Multiply</option>
+      <option value="div">Divide</option>
+    </select>
+    <span>&nbsp; Scalar:</span>
+    <input id="scalarInput" type="text" placeholder="" size="6" />
+    <br>
+    <input type="button" value="Draw" onclick="handleDrawOperationEvent()" />
   </body>
 </html>
