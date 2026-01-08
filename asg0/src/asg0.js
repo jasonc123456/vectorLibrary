@@ -45,21 +45,18 @@ function handleDrawEvent(){
   }
 }
 function handleDrawOperationEvent(){
-    const x1 = parseFloat(document.getElementById('x1Coord').value);
+  const x1 = parseFloat(document.getElementById('x1Coord').value);
   const y1 = parseFloat(document.getElementById('y1Coord').value);
   const x2 = parseFloat(document.getElementById('x2Coord').value);
   const y2 = parseFloat(document.getElementById('y2Coord').value);
   console.log("x1,y1,x2,y2 =", x1, y1, x2, y2);
   ctx.fillStyle = "black";
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  if (!isNaN(x1) && !isNaN(y1)){
-    const v1 = new Vector3([x1, y1, 0]);
-    drawVector(v1, "red");
-  }
-  if(!isNaN(x2) && !isNaN(y2)){
-    const v2 = new Vector3([x2, y2, 0]);
-    drawVector(v2, "blue");
-  }
+  if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) return;
+  const v1 = new Vector3([x1, y1, 0]);
+  drawVector(v1, "red");
+  const v2 = new Vector3([x2, y2, 0]);
+  drawVector(v2, "blue");
   const operation = document.getElementById('opSelect').value;
   const scalar = parseFloat(document.getElementById('scalarInput').value);
   if(operation == "add"){
