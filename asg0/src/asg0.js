@@ -102,8 +102,6 @@ function handleDrawOperationEvent(){
     console.log("v1 magnitude =", v1.magnitude());
     console.log("v2 magnitude =", v2.magnitude());
   }else if(operation == "nor"){
-    console.log("v1 magnitude =", v1.magnitude());
-    console.log("v2 magnitude =", v2.magnitude());
     const v3 = new Vector3([x1, y1, 0]);
     const v4 = new Vector3([x2, y2, 0]);
     v3.normalize();
