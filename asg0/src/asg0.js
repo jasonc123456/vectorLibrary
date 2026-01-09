@@ -92,7 +92,7 @@ function handleDrawOperationEvent(){
     if(cosAlpha > 1) cosAlpha = 1;
     if(cosAlpha < -1) cosAlpha = -1;
     const angleDegree = Math.acos(cosAlpha) * 180 / Math.PI;
-    console.log("Angle Between (Degrees)", angleDegree);
+    console.log("Angle Between (Degrees)", Math.round(angleDegree));
   }else if(operation == "cro"){
     const crossVector = Vector3.cross(v1, v2);
     const parallelogramArea = crossVector.magnitude();
