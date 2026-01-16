@@ -27,6 +27,11 @@ let selectedBrushType = brushSquare;
 let selectedColorRgba = [1, 1, 1, 1];
 let selectedSize = 10;
 let selectedCircleSegments = 12;
+//List holding all shapes that needs to be rendered
+let shapes = [];
+function setupWebGl(){
+  canvas = document.getElementById("webgl");
+}
 function main() {
   // Retrieve <canvas> element
   var canvas = document.getElementById('webgl');
