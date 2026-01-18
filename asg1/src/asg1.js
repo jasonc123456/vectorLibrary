@@ -60,6 +60,30 @@ function connectVariablesToGlsl(){
     return;
   }
 }
+function renderAllShapes(){
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  for(const shape of shapes){
+    shape.render();
+  }
+}
+function handleCanvasDraw(mouseEvent) {
+  const [clipX, clipY] = mouseEventToClipSpace(mouseEvent);
+  let shapeToAdd;
+  if (selectedBrushType === brushSquare) {
+    shapeToAdd = new PointShape();
+  } else if (selectedBrushType === brushTriangle) {
+    shapeToAdd = new TriangleShape();
+  } else {
+    shapeToAdd = new CircleShape();
+    shapeToAdd.segments = selectedCircleSegments;
+  }
+  shapeToAdd.position = [clipX, clipY];
+  shapeToAdd.color = [...selectedColorRgba];
+  shapeToAdd.size = selectedSize;
+  shapes.push(shapeToAdd);
+  renderAllShapes();
+}
+
 function main() {
   // Retrieve <canvas> element
   var canvas = document.getElementById('webgl');
