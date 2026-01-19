@@ -296,10 +296,10 @@ function drawMinecraftDiamondSword() {
     put(guardC - 2, r, outline);
     put(guardC + 2, r, outline);
   }
-  const pommelR = handleStartR + 10;
-  put(guardC, pommelR, pommel);
-  put(guardC - 1, pommelR, outline);
-  put(guardC + 1, pommelR, outline);
-  put(guardC, pommelR + 1, outline);
+  //const pommelR = handleStartR + 10;
+  //put(guardC, pommelR, pommel);
+  //put(guardC - 1, pommelR, outline);
+  //put(guardC + 1, pommelR, outline);
+  //put(guardC, pommelR + 1, outline);
 }
 
