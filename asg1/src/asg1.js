@@ -308,7 +308,7 @@ function drawMinecraftDiamondSword(){
   for (let i = 0; i < 10; i++){
     const r = handleStartR + i;
     put(guardC - 1, r, handleD);
-    put(guardC,     r, handleL);
+    put(guardC, r, handleL);
     put(guardC + 1, r, handleD);
     put(guardC - 2, r, outline);
     put(guardC + 2, r, outline);
