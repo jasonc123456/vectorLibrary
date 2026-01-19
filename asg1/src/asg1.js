@@ -29,6 +29,9 @@ let selectedBrushType = brushSquare;
 let selectedColorRgba = [1, 1, 1, 1];
 let selectedSize = 10;
 let selectedCircleSegments = 12;
+const brushEraser = 3;
+let selectedRotationDeg = 0;
+let eraserSize = 20; // in pixels
 //List holding all shapes that needs to be rendered
 let shapes = [];
 function setupWebGl(){
@@ -79,18 +82,25 @@ function renderAllShapes(){
 
 function handleCanvasDraw(mouseEvent){
   const [clipX, clipY] = mouseEventToClipSpace(mouseEvent);
+  if (selectedBrushType === brushEraser){
+    const radiusClip = (eraserSize / canvas.width) * 2.0;
+    eraseAt(clipX, clipY, radiusClip);
+    renderAllShapes();
+    return;
+  }
   let shapeToAdd;
-  if (selectedBrushType === brushSquare) {
+  if (selectedBrushType === brushSquare){
     shapeToAdd = new SquareShape();
-  } else if (selectedBrushType === brushTriangle) {
+  }else if(selectedBrushType === brushTriangle){
     shapeToAdd = new TriangleShape();
-  } else {
+  }else{
     shapeToAdd = new CircleShape();
     shapeToAdd.segments = selectedCircleSegments;
   }
   shapeToAdd.position = [clipX, clipY];
   shapeToAdd.color = [...selectedColorRgba];
   shapeToAdd.size = selectedSize;
+  shapeToAdd.rotationDeg = selectedRotationDeg;
   shapes.push(shapeToAdd);
   renderAllShapes();
 }
@@ -137,6 +147,19 @@ function addActionsForHtmlUi(){
   document.getElementById("segSlide").addEventListener("input", (ev) => {
     selectedCircleSegments = Number(ev.target.value);
   });
+  document.getElementById("rotSlide").addEventListener("input", function (ev) {
+    selectedRotationDeg = Number(ev.target.value);
+    document.getElementById("rotVal").innerText = String(selectedRotationDeg);
+  });
+}
+function eraseAt(x, y, radiusClip){
+  const r2 = radiusClip * radiusClip;
+  shapes = shapes.filter(function (s) {
+    if (!s.position) return true;
+    const dx = s.position[0] - x;
+    const dy = s.position[1] - y;
+    return (dx*dx + dy*dy) > r2;
+  });
 }
 function main(){
   setupWebGl();
@@ -149,6 +172,17 @@ function main(){
     }
   };
   renderAllShapes();
+}
+function degToRad(deg){
+  return (deg * Math.PI) / 180;
+}
+
+function rotatePoint(x, y, cx, cy, rad){
+  const dx = x - cx;
+  const dy = y - cy;
+  const cosA = Math.cos(rad);
+  const sinA = Math.sin(rad);
+  return [cx + dx*cosA - dy*sinA, cy + dx*sinA + dy*cosA];
 }
 class SquareShape{
   constructor(){
@@ -179,15 +213,23 @@ class TriangleShape{
   }
   render(){
     gl.uniform4f(uFragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
-    const centerX = this.position[0];
-    const centerY = this.position[1];
-    const halfSize = this.size / 200;
-    const vertices = [
-      centerX,             centerY + halfSize,
-      centerX - halfSize,  centerY - halfSize,
-      centerX + halfSize,  centerY - halfSize,
-    ];
-    drawTriangleVertices(vertices);
+
+  const centerX = this.position[0];
+  const centerY = this.position[1];
+  const halfSize = this.size / 200;
+
+  // Base (unrotated) triangle vertices
+  let v0 = [centerX,             centerY + halfSize];
+  let v1 = [centerX - halfSize,  centerY - halfSize];
+  let v2 = [centerX + halfSize,  centerY - halfSize];
+
+  // Rotate around center
+  const rad = degToRad(this.rotationDeg || 0);
+  v0 = rotatePoint(v0[0], v0[1], centerX, centerY, rad);
+  v1 = rotatePoint(v1[0], v1[1], centerX, centerY, rad);
+  v2 = rotatePoint(v2[0], v2[1], centerX, centerY, rad);
+
+  drawTriangleVertices([v0[0], v0[1], v1[0], v1[1], v2[0], v2[1]]);
   }
 }
 class CircleShape{
@@ -201,17 +243,17 @@ class CircleShape{
     gl.uniform4f(uFragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
     const centerX = this.position[0];
     const centerY = this.position[1];
-    const radius = this.size / 200;
-    const angleStep = (2 * Math.PI) / this.segments;
-    for (let i = 0; i < this.segments; i++){
-      const angle0 = i * angleStep;
-      const angle1 = (i + 1) * angleStep;
-      const x0 = centerX + radius * Math.cos(angle0);
-      const y0 = centerY + radius * Math.sin(angle0);
-      const x1 = centerX + radius * Math.cos(angle1);
-      const y1 = centerY + radius * Math.sin(angle1);
-      drawTriangleVertices([centerX, centerY, x0, y0, x1, y1]);
-    }
+    const halfSize = this.size / 200;
+    // Base (unrotated) triangle vertices
+    let v0 = [centerX, centerY + halfSize];
+    let v1 = [centerX - halfSize, centerY - halfSize];
+    let v2 = [centerX + halfSize, centerY - halfSize];
+    // Rotate around center
+    const rad = degToRad(this.rotationDeg || 0);
+    v0 = rotatePoint(v0[0], v0[1], centerX, centerY, rad);
+    v1 = rotatePoint(v1[0], v1[1], centerX, centerY, rad);
+    v2 = rotatePoint(v2[0], v2[1], centerX, centerY, rad);
+    drawTriangleVertices([v0[0], v0[1], v1[0], v1[1], v2[0], v2[1]]);
   }
 }
 class RawTriangle{

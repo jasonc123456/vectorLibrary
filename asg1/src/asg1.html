@@ -1,8 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <style>
+      body{ font-family: Arial, sans-serif; margin: 20px;}
+      .app{ display: flex; gap: 16px; align-items: flex-start;}
+      .panel{
+        width: 280px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: #fafafa;
+      }
+      .row{margin: 10px 0;}
+      .row label{ display: inline-block; width: 70px;}
+      canvas{
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      }
+      button {margin-right: 6px; margin-top: 4px;}
+      .notes {font-size: 0.9em; color: #333;}
+    </style>
     <meta charset="utf-8" />
-    <title>Draw a point (1)</title>
+    <title>Assignment 1</title>
   </head>
 
   <body onload="main()">
@@ -45,7 +65,17 @@
       <input type="range" id="segSlide" min="3" max="60" value="12"/>
     </div>
     <div class="row">
-      <button id="drawPictureButton">Draw My Picture</button>
+      Bonus Features!
+      <button id="eraserButton">Eraser</button>
+      <label>Eraser</label>
+      <input type="range" id="eraserSlide" min="5" max="60" value="20"/>
+      <span id="eraserVal">20</span>
+      <label>Rotate</label>
+      <input type="range" id="rotSlide" min="0" max="360" value="0"/>
+      <span id="rotVal">0</span>
+    </div>
+    <div class="row">
+      <button id="drawPictureButton">Render My Picture</button>
     </div>
 
     <img src="mySketch.jpg" width="400" alt="My sketch reference" />
