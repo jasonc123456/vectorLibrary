@@ -122,7 +122,7 @@ function addActionsForHtmlUi(){
     selectedCircleSegments = Number(ev.target.value);
   });
 }
-function main() {
+function main(){
   setupWebGl();
   connectVariablesToGlsl();
   addActionsForHtmlUi();
@@ -133,25 +133,73 @@ function main() {
     }
   };
   renderAllShapes();
-  // Get the rendering context for WebGL
-  var gl = getWebGLContext(canvas);
-  if (!gl) {
-    console.log('Failed to get the rendering context for WebGL');
+}
+class squareShape{
+  constructor(){
+    this.position = [0, 0];
+    this.color = [1, 1, 1, 1];
+    this.size = 10;
+  }
+  render(){
+    gl.uniform4f(uFragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+    gl.uniform1f(uPointSize, this.size);
+
+    gl.vertexAttrib3f(aPosition, this.position[0], this.position[1], 0);
+    gl.drawArrays(gl.POINTS, 0, 1);
+  }
+}
+function drawTriangleVertices(vertices){
+  const vertexBuffer = gl.createBuffer();
+  if(!vertexBuffer){
+    console.log("Failed to create vertex buffer");
     return;
   }
-
-  // Initialize shaders
-  if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-    console.log('Failed to intialize shaders.');
-    return;
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
+  gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(aPosition);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+class TriangleShape{
+  constructor(){
+    this.position = [0, 0];
+    this.color = [1, 1, 1, 1];
+    this.size = 10;
   }
-
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
-  // Draw a point
-  gl.drawArrays(gl.POINTS, 0, 1);
+  render(){
+    gl.uniform4f(uFragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+    const centerX = this.position[0];
+    const centerY = this.position[1];
+    const halfSize = this.size / 200;
+    const vertices = [
+      centerX,             centerY + halfSize,
+      centerX - halfSize,  centerY - halfSize,
+      centerX + halfSize,  centerY - halfSize,
+    ];
+    drawTriangleVertices(vertices);
+  }
+}
+class CircleShape{
+  constructor() {
+    this.position = [0, 0];
+    this.color = [1, 1, 1, 1];
+    this.size = 10;
+    this.segments = 12;
+  }
+  render(){
+    gl.uniform4f(uFragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+    const centerX = this.position[0];
+    const centerY = this.position[1];
+    const radius = this.size / 200;
+    const angleStep = (2 * Math.PI) / this.segments;
+    for (let i = 0; i < this.segments; i++){
+      const angle0 = i * angleStep;
+      const angle1 = (i + 1) * angleStep;
+      const x0 = centerX + radius * Math.cos(angle0);
+      const y0 = centerY + radius * Math.sin(angle0);
+      const x1 = centerX + radius * Math.cos(angle1);
+      const y1 = centerY + radius * Math.sin(angle1);
+      drawTriangleVertices([centerX, centerY, x0, y0, x1, y1]);
+    }
+  }
 }
