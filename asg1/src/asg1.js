@@ -91,6 +91,37 @@ function mouseEventToClipSpace(mouseEvent) {
   const clipY = (canvas.height / 2 - pixelY) / (canvas.height / 2);
   return [clipX, clipY];
 }
+function addActionsForHtmlUi() {
+  document.getElementById("clearButton").onclick = () => {
+    shapes = [];
+    renderAllShapes();
+  };
+  document.getElementById("squareButton").onclick = () => {
+    selectedBrushType = brushSquare;
+  };
+  document.getElementById("triButton").onclick = () => {
+    selectedBrushType = brushTriangle;
+  };
+  document.getElementById("circleButton").onclick = () => {
+    selectedBrushType = brushCircle;
+  };
+  const updateSelectedColorFromSliders = () => {
+    const r = document.getElementById("redSlide").value / 100;
+    const g = document.getElementById("greenSlide").value / 100;
+    const b = document.getElementById("blueSlide").value / 100;
+    selectedColorRgba = [r, g, b, 1];
+  };
+  document.getElementById("redSlide").addEventListener("input", updateSelectedColorFromSliders);
+  document.getElementById("greenSlide").addEventListener("input", updateSelectedColorFromSliders);
+  document.getElementById("blueSlide").addEventListener("input", updateSelectedColorFromSliders);
+  updateSelectedColorFromSliders();
+  document.getElementById("sizeSlide").addEventListener("input", (ev) => {
+    selectedSize = Number(ev.target.value);
+  });
+  document.getElementById("segSlide").addEventListener("input", (ev) => {
+    selectedCircleSegments = Number(ev.target.value);
+  });
+}
 function main() {
   // Retrieve <canvas> element
   var canvas = document.getElementById('webgl');
