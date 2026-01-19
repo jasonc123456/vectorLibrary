@@ -149,7 +149,7 @@ class SquareShape{
   render(){
     gl.uniform4f(uFragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
     gl.uniform1f(uPointSize, this.size);
-
+    gl.disableVertexAttribArray(aPosition);
     gl.vertexAttrib3f(aPosition, this.position[0], this.position[1], 0);
     gl.drawArrays(gl.POINTS, 0, 1);
   }
