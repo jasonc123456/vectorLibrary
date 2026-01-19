@@ -105,6 +105,7 @@ function mouseEventToClipSpace(mouseEvent){
 function addActionsForHtmlUi(){
   document.getElementById("clearButton").onclick = function(){
     shapes = [];
+    pictureShapes = [];
     renderAllShapes();
   };
   document.getElementById("squareButton").onclick = function(){
