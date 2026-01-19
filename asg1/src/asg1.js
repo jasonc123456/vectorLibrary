@@ -102,13 +102,13 @@ function addActionsForHtmlUi(){
     shapes = [];
     renderAllShapes();
   };
-  document.getElementById("squareButton").onclick = () => {
+  document.getElementById("squareButton").onclick = function () {
     selectedBrushType = brushSquare;
   };
-  document.getElementById("triButton").onclick = () => {
+  document.getElementById("triButton").onclick = function () {
     selectedBrushType = brushTriangle;
   };
-  document.getElementById("circleButton").onclick = () => {
+  document.getElementById("circleButton").onclick = function () {
     selectedBrushType = brushCircle;
   };
   const updateSelectedColorFromSliders = () => {
