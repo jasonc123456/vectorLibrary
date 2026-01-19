@@ -245,22 +245,18 @@ function addRectTrianglesTwoTone(list, x0, y0, x1, y1, colorA, colorB){
 //Referenced AI input on how to create the drawing 
 function drawMinecraftDiamondSword(){
   pictureShapes = [];
-
   // Grid area
   const cols = 40;
   const rows = 40;
   const cellToClip = makeGridMapper(cols, rows, -0.75, 0.75, -0.9, 0.9);
-
   function put(col, row, color){
     const p = cellToClip(col, row);
     addRectTriangles(pictureShapes, p[0], p[1], p[2], p[3], color);
   }
-
   function putTwoTone(col, row, colorA, colorB){
     const p = cellToClip(col, row);
     addRectTrianglesTwoTone(pictureShapes, p[0], p[1], p[2], p[3], colorA, colorB);
   }
-
   // Color palette
   const outline = [0.05, 0.05, 0.07, 1.0];
   const bladeHi = [0.70, 0.97, 0.97, 1.0];
@@ -270,9 +266,14 @@ function drawMinecraftDiamondSword(){
   const guardSh = [0.70, 0.55, 0.12, 1.0];
   const handleD = [0.35, 0.20, 0.10, 1.0];
   const handleL = [0.55, 0.32, 0.16, 1.0];
+  // Secondary shades
   const bladeHi2 = [0.55, 0.93, 0.93, 1.0];
   const bladeMd2 = [0.22, 0.78, 0.80, 1.0];
   const bladeLo2 = [0.10, 0.48, 0.55, 1.0];
+  const guardAu2 = [0.78, 0.62, 0.16, 1.0];
+  const guardSh2 = [0.55, 0.42, 0.10, 1.0];
+  const handleD2 = [0.25, 0.14, 0.07, 1.0];
+  const handleL2 = [0.40, 0.24, 0.12, 1.0];
   const baseCol = 22;
   const guardR = 22;
   const guardC = baseCol;
@@ -288,18 +289,22 @@ function drawMinecraftDiamondSword(){
     putTwoTone(c, r, bladeMd, bladeMd2);
     putTwoTone(c + 1, r, bladeHi, bladeHi2);
   }
+  // Tip
   {
     const tipC = baseCol;
     const tipR = bladeBaseR - bladeLen;
     put(tipC, tipR, outline);
     put(tipC - 1, tipR + 1, outline);
     put(tipC + 1, tipR + 1, outline);
-    put(tipC, tipR + 1, bladeMd);
+    putTwoTone(tipC, tipR + 1, bladeMd, bladeMd2);
   }
   // Guard
   for (let dx = -3; dx <= 3; dx++){
-    const color = (dx === 0 || dx === -1) ? guardSh : guardAu;
-    put(guardC + dx, guardR, color);
+    if (dx === 0 || dx === -1){
+      putTwoTone(guardC + dx, guardR, guardSh, guardSh2);
+    } else {
+      putTwoTone(guardC + dx, guardR, guardAu, guardAu2);
+    }
   }
   put(guardC - 4, guardR, outline);
   put(guardC + 4, guardR, outline);
@@ -307,11 +312,12 @@ function drawMinecraftDiamondSword(){
   const handleStartR = guardR + 1;
   for (let i = 0; i < 10; i++){
     const r = handleStartR + i;
-    put(guardC - 1, r, handleD);
-    put(guardC, r, handleL);
-    put(guardC + 1, r, handleD);
+    putTwoTone(guardC - 1, r, handleD, handleD2);
+    putTwoTone(guardC, r, handleL, handleL2);
+    putTwoTone(guardC + 1, r, handleD, handleD2);
     put(guardC - 2, r, outline);
     put(guardC + 2, r, outline);
   }
 }
+
 
