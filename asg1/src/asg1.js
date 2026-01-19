@@ -19,6 +19,7 @@ var fragmentShaderSource =
 // global variables
 let canvas, gl, aPosition, uFragColor, uPointSize;
 let triangleVertexBuffer = null;
+let pictureShapes = [];
 //Brush modes
 const brushSquare = 0;
 const brushTriangle = 1;
@@ -68,10 +69,14 @@ function connectVariablesToGlsl(){
 }
 function renderAllShapes(){
   gl.clear(gl.COLOR_BUFFER_BIT);
-  for(const shape of shapes){
+  for(const shape of pictureShapes){
+    shape.render();
+  }
+  for (const shape of shapes){
     shape.render();
   }
 }
+
 function handleCanvasDraw(mouseEvent){
   const [clipX, clipY] = mouseEventToClipSpace(mouseEvent);
   let shapeToAdd;
@@ -98,18 +103,22 @@ function mouseEventToClipSpace(mouseEvent){
   return [clipX, clipY];
 }
 function addActionsForHtmlUi(){
-  document.getElementById("clearButton").onclick = function () {
+  document.getElementById("clearButton").onclick = function(){
     shapes = [];
     renderAllShapes();
   };
-  document.getElementById("squareButton").onclick = function () {
+  document.getElementById("squareButton").onclick = function(){
     selectedBrushType = brushSquare;
   };
-  document.getElementById("triButton").onclick = function () {
+  document.getElementById("triButton").onclick = function(){
     selectedBrushType = brushTriangle;
   };
-  document.getElementById("circleButton").onclick = function () {
+  document.getElementById("circleButton").onclick = function(){
     selectedBrushType = brushCircle;
+  };
+  document.getElementById("drawPictureButton").onclick = function(){
+    drawMinecraftDiamondSword();
+    renderAllShapes();
   };
   const updateSelectedColorFromSliders = () => {
     const r = document.getElementById("redSlide").value / 100;
@@ -203,4 +212,119 @@ class CircleShape{
       drawTriangleVertices([centerX, centerY, x0, y0, x1, y1]);
     }
   }
+}
+class RawTriangle{
+  constructor(vertices, color){
+    this.vertices = vertices;
+    this.color = color;
+  }
+  render(){
+    gl.uniform4f(uFragColor, this.color[0], this.color[1], this.color[2], this.color[3]);
+    drawTriangleVertices(this.vertices);
+  }
+}
+function makeGridMapper(cols, rows, left, right, bottom, top){
+  const cellW = (right - left) / cols;
+  const cellH = (top - bottom) / rows;
+  return function cellToClip(col, row){
+    const x0 = left + col * cellW;
+    const x1 = x0 + cellW;
+    const y1 = top - row * cellH;
+    const y0 = y1 - cellH;
+    return [x0, y0, x1, y1];
+  };
+}
+function addRectTriangles(targetList, x0, y0, x1, y1, color){
+  targetList.push(new RawTriangle([x0, y0,  x1, y0,  x1, y1], color));
+  targetList.push(new RawTriangle([x0, y0,  x1, y1,  x0, y1], color));
+}
+function drawMinecraftDiamondSword() {
+  pictureShapes = [];
+  // Grid area
+  const cols = 40;
+  const rows = 40;
+  const cellToClip = makeGridMapper(cols, rows, -0.75, 0.75, -0.9, 0.9);
+  // Color palette
+  const outline = [0.05, 0.05, 0.07, 1.0];
+  const bladeHi = [0.70, 0.97, 0.97, 1.0];
+  const bladeMd = [0.30, 0.85, 0.85, 1.0];
+  const bladeLo = [0.12, 0.55, 0.60, 1.0];
+  const guardAu = [0.95, 0.80, 0.20, 1.0];
+  const guardSh = [0.70, 0.55, 0.12, 1.0];
+  const handleD = [0.35, 0.20, 0.10, 1.0];
+  const handleL = [0.55, 0.32, 0.16, 1.0];
+  const pommel  = [0.85, 0.20, 0.25, 1.0];
+  function put(col, row, color) {
+    const p = cellToClip(col, row);
+    addRectTriangles(pictureShapes, p[0], p[1], p[2], p[3], color);
+  }
+  const baseCol = 23;
+  const baseRow = 33;
+  for (let i = 0; i < 18; i++) {
+    const colShift = Math.floor(i / 2);
+    const c = baseCol - colShift;
+    const r = baseRow - i;
+    put(c - 2, r, outline);
+    put(c + 2, r, outline);
+    put(c - 1, r - 1, outline);
+    put(c + 1, r + 1, outline);
+    put(c - 1, r, bladeLo);
+    put(c,     r, bladeMd);
+    put(c + 1, r, bladeHi);
+    put(c - 2, r - 1, outline);
+    put(c + 2, r + 1, outline);
+  }
+  {
+    const tipR = baseRow - 18;
+    const tipC = baseCol - Math.floor(18 / 2);
+    put(tipC, tipR, outline);
+    put(tipC - 1, tipR + 1, outline);
+    put(tipC + 1, tipR - 1, outline);
+
+    put(tipC, tipR + 1, bladeMd);
+    put(tipC, tipR - 1, bladeHi);
+    put(tipC - 1, tipR, bladeLo);
+    put(tipC + 1, tipR, bladeMd);
+  }
+  const guardRow = baseRow - 19;
+  const guardCol = baseCol - Math.floor(19 / 2);
+  for (let dx = -6; dx <= 6; dx++) {
+    const color = (dx % 3 === 0) ? guardSh : guardAu;
+    put(guardCol + dx, guardRow, color);
+    put(guardCol + dx, guardRow + 1, outline);
+    put(guardCol + dx, guardRow - 1, outline);
+  }
+  put(guardCol, guardRow, guardAu);
+  put(guardCol - 1, guardRow + 1, outline);
+  put(guardCol + 1, guardRow - 1, outline);
+  const handleStartRow = guardRow + 1;
+  for (let i = 0; i < 10; i++) {
+    const r = handleStartRow + i;
+    const c = guardCol;
+    put(c - 2, r, outline);
+    put(c + 2, r, outline);
+    put(c - 1, r, handleD);
+    put(c,     r, handleL);
+    put(c + 1, r, handleD);
+  }
+  const pommelRow = handleStartRow + 10;
+  const pommelCol = guardCol;
+  put(pommelCol, pommelRow, pommel);
+  put(pommelCol - 1, pommelRow, outline);
+  put(pommelCol + 1, pommelRow, outline);
+  put(pommelCol, pommelRow + 1, outline);
+  put(pommelCol + 5, pommelRow - 2, guardAu);
+  put(pommelCol + 5, pommelRow - 1, guardAu);
+  put(pommelCol + 5, pommelRow, guardAu);
+  put(pommelCol + 4, pommelRow + 1, guardAu);
+  put(pommelCol + 3, pommelRow + 1, guardAu);
+  put(pommelCol + 8, pommelRow - 2, guardAu);
+  put(pommelCol + 7, pommelRow - 2, guardAu);
+  put(pommelCol + 7, pommelRow - 1, guardAu);
+  put(pommelCol + 7, pommelRow, guardAu);
+  put(pommelCol + 7, pommelRow + 1, guardAu);
+  put(pommelCol + 8, pommelRow + 1, guardAu);
+  put(pommelCol + 2, pommelRow - 3, outline);
+  put(pommelCol + 6, pommelRow - 3, outline);
+  put(pommelCol + 9, pommelRow - 3, outline);
 }
