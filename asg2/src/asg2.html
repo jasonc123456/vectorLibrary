@@ -38,11 +38,7 @@
       <li>asg2.js: <a href="https://cse160.jasoncheung.dev/asg2/src/asg2.js" target="_blank">Click Here</a></li>
     </ul>
     <hr>
-    <div class="app">
-      <canvas id="webgl" width="400" height="400">
-      Please use a browser that supports "canvas"
-      </canvas>
-      <div class="panel">
+    <div class="panel">
         <div class="row">
           <label>Global Rotate (Y)</label>
           <input id="globalRotSlide" type="range" min="0" max="360" value="0"/>
@@ -62,12 +58,24 @@
         </div>
 
         <div class="row">
-          <button id="animButton">Toggle Animation</button>
+          <label>Ankle</label>
+          <input id="ankleSlide" type="range" min="-60" max="60" value="0"/>
+          <span id="ankleVal">0</span>
         </div>
 
         <div class="row">
-          <label>FPS</label>
-          <span id="fps">—</span>
+          <label>Head</label>
+          <input id="headSlide" type="range" min="-60" max="60" value="0"/>
+          <span id="headVal">0</span>
+        </div>
+
+        <div class="row">
+          <button id="animButton">Animation: OFF</button>
+        </div>
+
+        <div class="row">
+          <label>Performance</label>
+          <span class="mono" id="fps">—</span>
         </div>
       </div>
     </div>
