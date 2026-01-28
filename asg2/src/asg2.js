@@ -143,6 +143,13 @@ function drawCube(M, color){
   gl.enableVertexAttribArray(aPosition);
   gl.drawArrays(gl.TRIANGLES, 0, 36);
 }
+function drawSheepLeg(x, z, hipDeg, kneeDeg){
+  // joint at body bottom
+  const base = new Matrix4();
+  base.translate(x, -0.10, z);
+  base.rotate(hipDeg, 1, 0, 0);
+  
+}
 function handleCanvasDraw(mouseEvent){
   const [clipX, clipY] = mouseEventToClipSpace(mouseEvent);
   if (selectedBrushType === brushEraser){

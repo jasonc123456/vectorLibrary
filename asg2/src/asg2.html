@@ -44,40 +44,30 @@
       </canvas>
       <div class="panel">
         <div class="row">
-          <button id="clearButton">Clear Canvas</button>
+          <label>Global Rotate (Y)</label>
+          <input id="globalRotSlide" type="range" min="0" max="360" value="0"/>
+          <span id="globalRotVal">0</span>
         </div>
+
         <div class="row">
-          <label>Drawing Mode:</label>
-          <button id="squareButton">Squares</button>
-          <button id="triButton">Triangles</button>
-          <button id="circleButton">Circles</button>
+          <label>Hip</label>
+          <input id="hipSlide" type="range" min="-60" max="60" value="0"/>
+          <span id="hipVal">0</span>
         </div>
+
         <div class="row">
-          <label>Red</label>
-          <input type="range" id="redSlide" min="0" max="100" value="100"/>
-          <label>Green</label>
-          <input type="range" id="greenSlide" min="0" max="100" value="100"/>
-          <label>Blue</label>
-          <input type="range" id="blueSlide" min="0" max="100" value="100"/>
+          <label>Knee</label>
+          <input id="kneeSlide" type="range" min="-60" max="60" value="0"/>
+          <span id="kneeVal">0</span>
         </div>
+
         <div class="row">
-          <label>Size</label>
-          <input type="range" id="sizeSlide" min="1" max="40" value="10"/>
-          <label>Segments</label>
-          <input type="range" id="segSlide" min="3" max="60" value="12"/>
+          <button id="animButton">Toggle Animation</button>
         </div>
+
         <div class="row">
-          Bonus Features!
-          <button id="eraserButton">Eraser</button>
-          <label>Eraser</label>
-          <input type="range" id="eraserSlide" min="5" max="60" value="20"/>
-          <span id="eraserVal">20</span>
-          <label>Rotate(Select Triangle for Rotation)</label>
-          <input type="range" id="rotSlide" min="0" max="360" value="0"/>
-          <span id="rotVal">0</span>
-        </div>
-        <div class="row">
-          <button id="drawPictureButton">Render My Sketch</button>
+          <label>FPS</label>
+          <span id="fps">—</span>
         </div>
       </div>
     </div>
