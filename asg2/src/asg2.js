@@ -16,8 +16,6 @@ var fragmentShaderSource = `
 //global variables
 let canvas, gl;
 let aPosition, uFragColor, uModelMatrix, uGlobalRotateMatrix;
-let triangleVertexBuffer = null;
-let pictureShapes = [];
 let cubeVertexBuffer = null;
 let gAnimalGlobalRotation = 0;
 let gHipAngle = 0;
@@ -42,12 +40,9 @@ let gMousePitch = 0;
 let gPokeStartMs = -1;
 //fps
 let g_lastMs = 0;
-let g_fpsSmoothed = 0;
 //non-cube primitive (cylinder)
 let cylVertexBuffer = null;
 let cylVertCount = 0;
-//List holding all shapes that needs to be rendered
-let shapes = [];
 let fpsFrameCount = 0;
 let fpsLastTime = performance.now();
 const CUBE_VERTS = new Float32Array([
@@ -70,6 +65,10 @@ const CUBE_VERTS = new Float32Array([
   -0.5,-0.5,-0.5,   0.5,-0.5,-0.5,   0.5,-0.5, 0.5,
   -0.5,-0.5,-0.5,   0.5,-0.5, 0.5,  -0.5,-0.5, 0.5,
 ]);
+const POKE_MS = 900;
+function isPokeActive(nowMs) {
+  return (gPokeStartMs >= 0) && ((nowMs - gPokeStartMs) < POKE_MS);
+}
 function initCubeBuffer(){
   cubeVertexBuffer = gl.createBuffer();
   if(!cubeVertexBuffer){
@@ -297,7 +296,9 @@ function updateMouseRotation(ev){
   renderScene();
 }
 function triggerPoke(){
-  gPokeStartMs = performance.now();
+  const now = performance.now();
+  if(isPokeActive(now)) return;
+  gPokeStartMs = now;
 }
 function setupMouseControls(){
   let dragging = false;
@@ -316,9 +317,9 @@ function setupMouseControls(){
   window.addEventListener("mouseup", ()=>{ dragging = false; });
 }
 function updateAnimationAngles(tSec, nowMs){
-  const pokeActive = (gPokeStartMs >= 0) && ((nowMs - gPokeStartMs) < 900);
+  const pokeActive = isPokeActive(nowMs);
   if(pokeActive){
-    const u = (nowMs - gPokeStartMs)/900;
+    const u = (nowMs - gPokeStartMs) / POKE_MS;
     const wiggle = Math.sin(u * 10 * Math.PI);
     gHeadYaw = 35 * wiggle;
     gTailAngle = 60 * wiggle;
@@ -328,7 +329,6 @@ function updateAnimationAngles(tSec, nowMs){
     gAnkleAngle = -25;
     gMouthOpen = 0.9;
     gBlink = (Math.sin(u * 12 * Math.PI) > 0.65) ? 1 : 0;
-    if(u > 0.98) gPokeStartMs = -1;
     return;
   }
   //normal walk
@@ -348,18 +348,32 @@ function updateAnimationAngles(tSec, nowMs){
   else if(p < 0.06) gBlink = 1 - (p - 0.03) / 0.03; //opening
   else gBlink = 0;
 }
-function tick(nowMs) {
-  if (!g_lastMs) g_lastMs = nowMs;
+function tick(nowMs){
+  if(!g_lastMs) g_lastMs = nowMs;
   const dt = nowMs - g_lastMs;
   g_lastMs = nowMs;
   updateFPS(dt);
-  if (gAnimationOn || (gPokeStartMs >= 0)) {
+  const pokeActive = isPokeActive(nowMs);
+  //update angles only if walk anim is on or poke is active
+  if(gAnimationOn || pokeActive){
     updateAnimationAngles(nowMs / 1000.0, nowMs);
   }
-  renderScene();
+  if(!pokeActive && gPokeStartMs >= 0){
+    gPokeStartMs = -1;
+    if(!gAnimationOn){
+      gHeadYaw = 0;
+      gTailAngle = 0;
+      gEarFlap = 0;
+      gBlink = 0;
+      gMouthOpen = 0;
+    }
+  }
+  renderScene(nowMs);
   requestAnimationFrame(tick);
 }
-function renderScene(){
+function renderScene(nowMs = performance.now()){
+  const pokeActive = isPokeActive(nowMs);
+  const useAnim = gAnimationOn || pokeActive;
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   //global rotation uniform: slider + mouse
   const G = new Matrix4();
@@ -407,7 +421,7 @@ function renderScene(){
   const headFrame = new Matrix4();
   headFrame.set(root);
   headFrame.translate(0.49, 0.26, 0);
-  const headYaw = (gAnimationOn || gPokeStartMs >= 0) ? gHeadYaw : gHeadYawUI;
+  const headYaw = useAnim ? gHeadYaw : gHeadYawUI;
   headFrame.rotate(headYaw, 0, 1, 0);
 
   //wool head block
@@ -460,7 +474,8 @@ function renderScene(){
   //eyes flat on the face plate, blink by shrinking Y
   {
     const eyeX = 0.279; //slightly in front of plate
-    const eyeYScale = 0.035 * (1.0 - 0.95 * gBlink) + 0.002; //blink
+    const blink = useAnim ? gBlink : 0;
+    const eyeYScale = 0.035 * (1.0 - 0.95 * blink) + 0.002;
     const E1 = new Matrix4();
     E1.set(headFrame);
     E1.translate(eyeX, 0.02, 0.095);
@@ -482,17 +497,18 @@ function renderScene(){
   }
   //mouth
   {
-    const mouthH = 0.01 + 0.03 * gMouthOpen;
+    const mouthOpen = useAnim ? gMouthOpen : 0;
+    const mouthH = 0.01 + 0.03 * mouthOpen;
     const M = new Matrix4();
     M.set(headFrame);
-    M.translate(0.279, -0.14 - 0.01 * gMouthOpen, 0.00);
+    M.translate(0.279, -0.14 - 0.01 * mouthOpen, 0.00);
     M.scale(0.022, mouthH, 0.14);
     drawCube(M, [0.90, 0.76, 0.76, 1.0]);
   }
   //ears
   {
     const earColor = [0.86, 0.86, 0.86, 1.0]; //slightly darker than head
-    const flap = (gAnimationOn||gPokeStartMs>=0) ? gEarFlap : 0;
+    const flap = useAnim ? gEarFlap : 0;
     const zOut = 0.20;
     const sx = 0.06; //thickness (X)
     const sy = 0.28; //length (Y)
@@ -521,26 +537,27 @@ function renderScene(){
     const M = new Matrix4();
     M.set(root);
     M.translate(-0.455, 0.25, 0.00);
-    M.rotate((gAnimationOn||gPokeStartMs>=0) ? gTailAngle : 0, 0,0,1);
+    M.rotate(useAnim ? gTailAngle : 0, 0, 0, 1);
     M.rotate(140, 0,0,1);
     M.scale(0.10, 0.22, 0.10);
     drawCylinder(M, wool2);
   }
   //joints use only when animation is off
-  const hip = gAnimationOn ? gHipAngle : gHipAngleUI;
-  const knee = gAnimationOn ? gKneeAngle : gKneeAngleUI;
-  const ankle = gAnimationOn ? gAnkleAngle : gAnkleAngleUI;
+  const hip = useAnim ? gHipAngle : gHipAngleUI;
+  const knee = useAnim ? gKneeAngle : gKneeAngleUI;
+  const ankle = useAnim ? gAnkleAngle : gAnkleAngleUI;
   //4 legs, each has 3 levels thigh, calf, hoof
   drawLeg(root,  0.34,  0.22,  hip,  knee, ankle, skin, hoof);
   drawLeg(root,  0.34, -0.22, -hip,  knee, ankle, skin, hoof);
   drawLeg(root, -0.34,  0.22, -hip,  knee, ankle, skin, hoof);
   drawLeg(root, -0.34, -0.22,  hip,  knee, ankle, skin, hoof);
 }
-function updateFPS(dtMs) {
+//referenced AI suggestions
+function updateFPS(dtMs){
   fpsFrameCount++;
   const now = performance.now();
   const elapsed = now - fpsLastTime;
-  if (elapsed >= 500) { 
+  if (elapsed >= 500){ 
     const fps = (fpsFrameCount * 1000) / elapsed;
     const fpsEl = document.getElementById("fps");
     const msEl = document.getElementById("ms");
